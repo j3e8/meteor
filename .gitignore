@@ -1,0 +1,8 @@
+.DS_Store
+node_modules
+config/*
+!config/*.example
+!config/0.json
+www/bundle.js
+npm-debug.log
+package-lock.json
