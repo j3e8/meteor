@@ -1,0 +1,28 @@
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Avenir-Light', sans-serif;
+  font-weight: 300;
+  font-size: 14px;
+}
+
+div,
+section,
+header,
+nav,
+main,
+footer,
+aside,
+th,
+td,
+article,
+body * {
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+}
