@@ -3,15 +3,21 @@ floorsix.controller("/", function() {
   var level = 1;
   var meteors = [];
 
+  var time = 0;
+
   function init() {
     var canvasSize = floorsix.getCanvasSize();
     var totalMeteors = Math.floor(Math.sqrt(Math.sqrt(level)) * 10);
     meteors = new Array(totalMeteors);
     var meteorSize = (canvasSize.width * 0.04) / Math.floor(Math.sqrt(Math.sqrt(level)));
-    var avgSpawnInterval = 100 / Math.sqrt(Math.sqrt(level));
+    var avgSpawnInterval = 1000 / Math.sqrt(Math.sqrt(level));
     var spawnAt = 100;
     for (var i=0; i < meteors.length; i++) {
-      meteors[i] = Meteor.generate(Math.random() * canvasSize.width, 0, meteorSize, level, spawnAt);
+      var target = {
+        x: Math.random() * canvasSize.width,
+        y: canvasSize.height
+      }
+      meteors[i] = Meteor.generate(Math.random() * canvasSize.width, 0, meteorSize, level, spawnAt, target.x, target.y);
       spawnAt += Math.random() * 100 - 50 + avgSpawnInterval;
     }
     console.log('meteors', meteors);
@@ -19,8 +25,16 @@ floorsix.controller("/", function() {
   init();
 
   function animate(elapsedMs) {
+    time += elapsedMs;
+
     meteors.forEach(function(meteor) {
-      Meteor.animate(meteor, elapsedMs);
+      if (time >= meteor.spawnAt) {
+        Meteor.spawn(meteor);
+      }
+
+      if (meteor.alive) {
+        Meteor.animate(meteor, elapsedMs);
+      }
     });
   }
 
@@ -29,8 +43,12 @@ floorsix.controller("/", function() {
     ctx.fillStyle = BACKGROUND_COLOR;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    Planet.render(canvas);
+
     meteors.forEach(function(meteor) {
-      Meteor.render(meteor, canvas);
+      if (meteor.alive) {
+        Meteor.render(meteor, canvas);
+      }
     });
   }
 

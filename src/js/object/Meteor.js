@@ -2,7 +2,7 @@ var Meteor = {};
 
 (function() {
 
-  Meteor.generate = function(x, y, radius, level, spawnAt) {
+  Meteor.generate = function(x, y, radius, level, spawnAt, targetX, targetY) {
     var MIN_VELOCITY = Math.sqrt(level) * 0.1;
     var MAX_VELOCITY = Math.sqrt(level + 1) * 0.1;
     var MIN_ROTATION_VELOCITY = 0.001;
@@ -49,6 +49,7 @@ var Meteor = {};
 
     // return meteor object
     return {
+      alive: false,
       x: x,
       y: y,
       radius: radius,
@@ -57,7 +58,7 @@ var Meteor = {};
       velocity: Math.random() * (MAX_VELOCITY - MIN_VELOCITY) + MIN_VELOCITY,
       spots: spots,
       vertices: vertices,
-      trajectory: Math.random() * (Math.PI / 2) + (Math.PI / 4),
+      trajectory: floorsix.math.atan(targetY - y, targetX - x),
       spawnAt: spawnAt
     }
   }
@@ -133,6 +134,10 @@ var Meteor = {};
       ctx.fill();
     }
     ctx.restore();
+  }
+
+  Meteor.spawn = function(meteor) {
+    meteor.alive = true;
   }
 
 })();
