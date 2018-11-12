@@ -2,10 +2,18 @@ floorsix.controller("/", function() {
   var BACKGROUND_COLOR = "#1D2F37";
   var level = 1;
   var meteors = [];
+  var planet;
 
   var time = 0;
 
-  function init() {
+  function initGame() {
+    var canvasSize = floorsix.getCanvasSize();
+    planet = Planet.generate(canvasSize);
+    console.log('planet', planet);
+  }
+  initGame();
+
+  function initLevel() {
     var canvasSize = floorsix.getCanvasSize();
     var totalMeteors = Math.floor(Math.sqrt(Math.sqrt(level)) * 10);
     meteors = new Array(totalMeteors);
@@ -22,7 +30,7 @@ floorsix.controller("/", function() {
     }
     console.log('meteors', meteors);
   }
-  init();
+  initLevel();
 
   function animate(elapsedMs) {
     time += elapsedMs;
@@ -43,7 +51,7 @@ floorsix.controller("/", function() {
     ctx.fillStyle = BACKGROUND_COLOR;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    Planet.render(canvas);
+    Planet.render(planet, canvas);
 
     meteors.forEach(function(meteor) {
       if (meteor.alive) {
