@@ -36,12 +36,21 @@ floorsix.controller("/", function() {
     time += elapsedMs;
 
     meteors.forEach(function(meteor) {
-      if (time >= meteor.spawnAt) {
+      if (time >= meteor.spawnAt && !meteor.spawned) {
         Meteor.spawn(meteor);
       }
 
       if (meteor.alive) {
         Meteor.animate(meteor, elapsedMs);
+      }
+
+      var result = Planet.hitTest(planet, meteor);
+      if (result.hit && result.building) {
+        meteor.alive = false;
+        result.building.alive = false;
+      }
+      else if (result.hit) {
+        meteor.alive = false;
       }
     });
   }
@@ -61,7 +70,13 @@ floorsix.controller("/", function() {
   }
 
   function handleClick(x, y) {
-
+    for (var m = 0; m < meteors.length; m++) {
+      var meteor = meteors[m];
+      if (meteor.alive && Meteor.hitTest(meteor, x, y)) {
+        meteor.alive = false;
+        break;
+      }
+    }
   }
 
   return {

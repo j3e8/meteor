@@ -59,11 +59,23 @@ var Meteor = {};
       spots: spots,
       vertices: vertices,
       trajectory: floorsix.math.atan(targetY - y, targetX - x),
-      spawnAt: spawnAt
+      spawnAt: spawnAt,
+      spawned: false
     }
   }
 
+  Meteor.hitTest = function(meteor, x, y) {
+    var sqd = (meteor.x - x) * (meteor.x - x) + (meteor.y - y) * (meteor.y - y);
+    if (sqd <= meteor.radius * meteor.radius) {
+      return true;
+    }
+    return false;
+  }
+
   Meteor.animate = function(meteor, elapsedMs) {
+    if (!meteor.alive) {
+      return;
+    }
     var vx = Math.cos(meteor.trajectory) * meteor.velocity;
     var vy = Math.sin(meteor.trajectory) * meteor.velocity;
 
@@ -74,6 +86,9 @@ var Meteor = {};
   }
 
   Meteor.render = function(meteor, canvas) {
+    if (!meteor.alive) {
+      return;
+    }
     var ctx = canvas.context;
 
     // render the tail
@@ -138,6 +153,7 @@ var Meteor = {};
 
   Meteor.spawn = function(meteor) {
     meteor.alive = true;
+    meteor.spawned = true;
   }
 
 })();

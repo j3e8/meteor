@@ -28,6 +28,34 @@ var Planet = {};
     }
   }
 
+  Planet.hitTest = function(planet, meteor) {
+    let result = {
+      hit: false
+    }
+    let dx = planet.center.x - meteor.x;
+    let dy = planet.center.y - meteor.y;
+    let sqd = (dx * dx) + (dy * dy);
+    let sqMinRadiusToCollide = (planet.radius - meteor.radius) * (planet.radius - meteor.radius);
+    let sqMaxRadiusToCollide = (planet.radius + meteor.radius) * (planet.radius + meteor.radius);
+    if (sqd >= sqMinRadiusToCollide && sqd <= sqMaxRadiusToCollide) {
+      result.hit = true;
+
+      // the meteor has hit the surface. now let's figure out which building (if any)
+      let angleOfIncidence = floorsix.math.atan(dy, dx);
+      let inverseAngleOfIncidence = angleOfIncidence + Math.PI;
+      while (inverseAngleOfIncidence >= Math.PI * 2) inverseAngleOfIncidence -= Math.PI * 2;
+      for (let b = 0; b < planet.buildings.length; b++) {
+        let building = planet.buildings[b];
+        if (building.start <= inverseAngleOfIncidence && inverseAngleOfIncidence <= building.end) {
+          result.building = building;
+          break;
+        }
+      }
+      return result;
+    }
+    return result;
+  }
+
   Planet.render = function(planet, canvas) {
     var ctx = canvas.context;
 
@@ -48,6 +76,7 @@ var Planet = {};
 
   function generateBuilding(start, end, height) {
     return {
+      alive: true,
       color: createPastel(),
       start: start,
       end: end,
@@ -56,6 +85,9 @@ var Planet = {};
   }
 
   function renderBuilding(building, planet, canvas) {
+    if (!building.alive) {
+      return;
+    }
     var WINDOW_PADDING_TOP = 0.01 * canvas.height;
     var WINDOW_HEIGHT = 0.015 * canvas.height;
     var NUM_WINDOW_COLUMNS = 2;
