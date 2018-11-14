@@ -3,13 +3,14 @@ floorsix.controller("/", function() {
   var level = 1;
   var meteors = [];
   var planet;
+  var stats;
 
   var time = 0;
 
   function initGame() {
     var canvasSize = floorsix.getCanvasSize();
     planet = Planet.generate(canvasSize);
-    console.log('planet', planet);
+    stats = Stats.generate();
   }
   initGame();
 
@@ -67,6 +68,12 @@ floorsix.controller("/", function() {
         Meteor.render(meteor, canvas);
       }
     });
+
+    var fs = 14;
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.font = fs + "px Avenir-Heavy";
+    ctx.textAlign = "right";
+    ctx.fillText(stats.score, canvas.width - 2, fs + 2);
   }
 
   function handleClick(x, y) {
@@ -74,6 +81,7 @@ floorsix.controller("/", function() {
       var meteor = meteors[m];
       if (meteor.alive && Meteor.hitTest(meteor, x, y)) {
         meteor.alive = false;
+        Stats.breakMeteor(stats);
         break;
       }
     }
