@@ -2,12 +2,13 @@ var Planet = {};
 
 (function() {
 
-  Planet.generate = function(canvasSize) {
-    var NUM_BUILDINGS = 11;
-    var NUM_STARS = 75;
+  var NUM_BUILDINGS = 11;
+  var NUM_STARS = 75;
+  var STRIPE_WIDTH = 8;
+  var MIN_ANGLE = Math.PI * 1.43;
+  var MAX_ANGLE = Math.PI * 1.57;
 
-    var MIN_ANGLE = Math.PI * 1.43;
-    var MAX_ANGLE = Math.PI * 1.57;
+  Planet.generate = function(canvasSize) {
     var degreesPerBuilding = (MAX_ANGLE - MIN_ANGLE) / NUM_BUILDINGS;
 
     var MIN_HEIGHT = 0.05 * canvasSize.height;
@@ -28,7 +29,7 @@ var Planet = {};
       }
     }
 
-    return {
+    var planet = {
       buildings: buildings,
       color: createPastel(),
       center: {
@@ -38,6 +39,21 @@ var Planet = {};
       radius: canvasSize.height * 1.1,
       stars: stars
     }
+
+    var visiblePlanetHeight = canvasSize.height - (planet.center.y - planet.radius);
+    var numStripes = Math.ceil(visiblePlanetHeight / STRIPE_WIDTH);
+    var stripes = new Array(numStripes);
+    for (var i=0; i < stripes.length; i++) {
+      var xvariance = canvasSize.width * 0.5;
+      stripes[i] = {
+        x: (canvasSize.width / 2) + (Math.random() * xvariance - xvariance / 2),
+        y: (planet.center.y - planet.radius) + i * STRIPE_WIDTH
+      }
+    }
+
+    planet.stripes = stripes;
+
+    return planet;
   }
 
   Planet.getRandomBuildingCoordinates = function(planet) {
@@ -101,6 +117,21 @@ var Planet = {};
     ctx.arc(planet.center.x, planet.center.y, planet.radius, 0, Math.PI*2);
     ctx.fill();
     ctx.stroke();
+
+    // render stripes
+    ctx.lineWidth = STRIPE_WIDTH;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.07)";
+    ctx.save();
+    ctx.clip();
+    for (var i=0; i < planet.stripes.length; i++) {
+      var stripe = planet.stripes[i];
+      ctx.beginPath();
+      ctx.moveTo(0, stripe.y);
+      ctx.lineTo(stripe.x, stripe.y);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   function generateBuilding(start, end, height) {
