@@ -1,12 +1,18 @@
 var Meteor = {};
 
 (function() {
+  var MIN_ROTATION_VELOCITY = 0.001;
+  var MAX_ROTATION_VELOCITY = 0.0045;
 
-  Meteor.generate = function(x, y, radius, level, spawnAt, targetX, targetY) {
-    var MIN_VELOCITY = Math.sqrt(level) * 0.1;
-    var MAX_VELOCITY = Math.sqrt(level + 1) * 0.1;
-    var MIN_ROTATION_VELOCITY = 0.001;
-    var MAX_ROTATION_VELOCITY = 0.005;
+  Meteor.generate = function(canvasSize, level, spawnAt, targetX, targetY) {
+    var minVelocity = Math.sqrt(Math.sqrt(level)) * 0.08;
+    var maxVelocity = Math.sqrt(Math.sqrt(level + 1)) * 0.08;
+
+    // calculate meteor radius based on level and canvasSize
+    var baseSize = canvasSize.width * 0.05;
+    var levelMultipler = 1 / Math.sqrt(Math.sqrt(level));
+    var randomMultiplier = Math.random() * 0.4 + 0.8; // between 0.8 and 1.2
+    var radius = baseSize * levelMultipler * randomMultiplier;
 
     // generate vertices
     var vertices = [];
@@ -47,6 +53,14 @@ var Meteor = {};
       spots.push(spot);
     }
 
+    var x = Math.random() * canvasSize.width;
+    var y = -radius;
+
+    var rotationVelocity = Math.random() * (MAX_ROTATION_VELOCITY - MIN_ROTATION_VELOCITY) + MIN_ROTATION_VELOCITY;
+    if (Math.random() < 0.5) {
+      rotationVelocity *= -1;
+    }
+
     // return meteor object
     return {
       alive: false,
@@ -54,8 +68,8 @@ var Meteor = {};
       y: y,
       radius: radius,
       rotation: 0,
-      rotationVelocity: Math.random() * (MAX_ROTATION_VELOCITY - MIN_ROTATION_VELOCITY) + MIN_ROTATION_VELOCITY,
-      velocity: Math.random() * (MAX_VELOCITY - MIN_VELOCITY) + MIN_VELOCITY,
+      rotationVelocity: rotationVelocity,
+      velocity: Math.random() * (maxVelocity - minVelocity) + minVelocity,
       spots: spots,
       vertices: vertices,
       trajectory: floorsix.math.atan(targetY - y, targetX - x),
@@ -83,6 +97,12 @@ var Meteor = {};
     meteor.y += vy * elapsedMs;
 
     meteor.rotation += meteor.rotationVelocity * elapsedMs;
+    while (meteor.rotation >= Math.PI * 2) {
+      meteor.rotation -= Math.PI * 2;
+    }
+    while (meteor.rotation < 0) {
+      meteor.rotation += Math.PI * 2;
+    }
   }
 
   Meteor.render = function(meteor, canvas) {
@@ -95,26 +115,21 @@ var Meteor = {};
     ctx.save();
     ctx.translate(meteor.x, meteor.y);
 
-    // ctx.fillStyle = "#224953";
-    // ctx.fillStyle = "rgba(34, 73, 83, 0.5)";
-    ctx.fillStyle = "rgba(235, 251, 251, 0.05)";
+    ctx.fillStyle = "rgba(153, 219, 247, 0.05)";
     ctx.beginPath();
     ctx.arc(0, 0, meteor.radius * 1.4, meteor.trajectory - Math.PI / 1.75, meteor.trajectory + Math.PI / 1.75);
     ctx.lineTo(Math.cos(meteor.trajectory) * -meteor.radius * 6.6, Math.sin(meteor.trajectory) * -meteor.radius * 6.6);
     ctx.closePath();
     ctx.fill();
 
-    // ctx.fillStyle = "#99E8EE";
-    // ctx.fillStyle = "rgba(153, 232, 238, 0.5)";
-    ctx.fillStyle = "rgba(235, 251, 251, 0.1)";
+    ctx.fillStyle = "rgba(153, 219, 247, 0.1)";
     ctx.beginPath();
     ctx.arc(0, 0, meteor.radius * 1.25, meteor.trajectory - Math.PI / 1.75, meteor.trajectory + Math.PI / 1.75);
     ctx.lineTo(Math.cos(meteor.trajectory) * -meteor.radius * 6, Math.sin(meteor.trajectory) * -meteor.radius * 6);
     ctx.closePath();
     ctx.fill();
 
-    // ctx.fillStyle = "#EBFBFB";
-    ctx.fillStyle = "rgba(235, 251, 251, 0.2)";
+    ctx.fillStyle = "rgba(153, 219, 247, 0.2)";
     ctx.beginPath();
     ctx.arc(0, 0, meteor.radius * 1.1, meteor.trajectory - Math.PI / 1.75, meteor.trajectory + Math.PI / 1.75);
     ctx.lineTo(Math.cos(meteor.trajectory) * -meteor.radius * 5.4, Math.sin(meteor.trajectory) * -meteor.radius * 5.4);

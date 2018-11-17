@@ -1,90 +1,61 @@
 floorsix.controller("/", function() {
-  var BACKGROUND_COLOR = "#1D2F37";
-  var level = 1;
-  var meteors = [];
-  var planet;
-  var stats;
+  var highScore = Stats.loadHighScore();
 
-  var time = 0;
+  var NUM_STARS = 75;
 
-  function initGame() {
-    var canvasSize = floorsix.getCanvasSize();
-    planet = Planet.generate(canvasSize);
-    stats = Stats.generate();
-  }
-  initGame();
-
-  function initLevel() {
-    var canvasSize = floorsix.getCanvasSize();
-    var totalMeteors = Math.floor(Math.sqrt(Math.sqrt(level)) * 10);
-    meteors = new Array(totalMeteors);
-    var meteorSize = (canvasSize.width * 0.04) / Math.floor(Math.sqrt(Math.sqrt(level)));
-    var avgSpawnInterval = 1000 / Math.sqrt(Math.sqrt(level));
-    var spawnAt = 100;
-    for (var i=0; i < meteors.length; i++) {
-      var target = {
-        x: Math.random() * canvasSize.width,
-        y: canvasSize.height
-      }
-      meteors[i] = Meteor.generate(Math.random() * canvasSize.width, 0, meteorSize, level, spawnAt, target.x, target.y);
-      spawnAt += Math.random() * 100 - 50 + avgSpawnInterval;
+  var canvasSize = floorsix.getCanvasSize();
+  var stars = new Array(NUM_STARS);
+  for (var i=0; i < stars.length; i++) {
+    stars[i] = {
+      x: Math.random() * canvasSize.width,
+      y: Math.random() * canvasSize.height,
+      brightness: Math.random() * 0.5 + 0.3,
+      size: Math.random() * 2.0
     }
-    console.log('meteors', meteors);
   }
-  initLevel();
 
   function animate(elapsedMs) {
-    time += elapsedMs;
 
-    meteors.forEach(function(meteor) {
-      if (time >= meteor.spawnAt && !meteor.spawned) {
-        Meteor.spawn(meteor);
-      }
-
-      if (meteor.alive) {
-        Meteor.animate(meteor, elapsedMs);
-      }
-
-      var result = Planet.hitTest(planet, meteor);
-      if (result.hit && result.building) {
-        meteor.alive = false;
-        result.building.alive = false;
-      }
-      else if (result.hit) {
-        meteor.alive = false;
-      }
-    });
   }
 
   function render(canvas) {
     var ctx = canvas.context;
-    ctx.fillStyle = BACKGROUND_COLOR;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    Planet.render(planet, canvas);
+    // render stars in the background
+    stars.forEach(function(star) {
+      renderStar(star, canvas);
+    })
 
-    meteors.forEach(function(meteor) {
-      if (meteor.alive) {
-        Meteor.render(meteor, canvas);
-      }
-    });
-
-    var fs = 14;
+    // render the game title
+    var fs = Math.round(canvas.width * 0.2);
     ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
     ctx.font = fs + "px Avenir-Heavy";
-    ctx.textAlign = "right";
-    ctx.fillText(stats.score, canvas.width - 2, fs + 2);
+    ctx.textAlign = "center";
+
+    ctx.fillText('METEOR', canvas.width / 2, canvas.height / 3);
+
+    if (highScore) {
+      ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+      ctx.font = "14px Avenir-Heavy";
+      ctx.textAlign = "center";
+      ctx.fillText('High score: ' + highScore, canvas.width / 2, canvas.height / 3 + 40);
+    }
+
+    ctx.font = "16px Avenir-Heavy";
+    ctx.fillText('Tap to play', canvas.width / 2, canvas.height / 1.5);
+  }
+
+  function renderStar(star, canvas) {
+    var ctx = canvas.context;
+    var hex = Math.round(star.brightness * 255).toString(16);
+    ctx.fillStyle = '#' + hex + hex + hex;
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.size, 0, Math.PI*2);
+    ctx.fill();
   }
 
   function handleClick(x, y) {
-    for (var m = 0; m < meteors.length; m++) {
-      var meteor = meteors[m];
-      if (meteor.alive && Meteor.hitTest(meteor, x, y)) {
-        meteor.alive = false;
-        Stats.breakMeteor(stats);
-        break;
-      }
-    }
+    floorsix.navigate('/play');
   }
 
   return {

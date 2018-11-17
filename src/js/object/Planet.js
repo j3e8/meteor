@@ -4,6 +4,7 @@ var Planet = {};
 
   Planet.generate = function(canvasSize) {
     var NUM_BUILDINGS = 11;
+    var NUM_STARS = 75;
 
     var MIN_ANGLE = Math.PI * 1.43;
     var MAX_ANGLE = Math.PI * 1.57;
@@ -17,6 +18,16 @@ var Planet = {};
       buildings[i] = generateBuilding(MIN_ANGLE + degreesPerBuilding * i, MIN_ANGLE + degreesPerBuilding * (i+1), Math.random() * (MAX_HEIGHT - MIN_HEIGHT) + MIN_HEIGHT);
     }
 
+    var stars = new Array(NUM_STARS);
+    for (var i=0; i < stars.length; i++) {
+      stars[i] = {
+        x: Math.random() * canvasSize.width,
+        y: Math.random() * canvasSize.height,
+        brightness: Math.random() * 0.5 + 0.3,
+        size: Math.random() * 2.0
+      }
+    }
+
     return {
       buildings: buildings,
       color: createPastel(),
@@ -24,8 +35,21 @@ var Planet = {};
         x: canvasSize.width / 2,
         y: canvasSize.height * 2.02
       },
-      radius: canvasSize.height * 1.1
+      radius: canvasSize.height * 1.1,
+      stars: stars
     }
+  }
+
+  Planet.getRandomBuildingCoordinates = function(planet) {
+    var standingBuildings = planet.buildings.filter(function(b) { return b.alive; });
+    var targetBuilding = standingBuildings[Math.floor(Math.random() * standingBuildings.length)];
+
+    var avgRadians = (targetBuilding.start + targetBuilding.end) / 2;
+    var pt = {
+      x: planet.center.x + Math.cos(avgRadians) * planet.radius,
+      y: planet.center.y + Math.sin(avgRadians) * planet.radius
+    }
+    return pt;
   }
 
   Planet.hitTest = function(planet, meteor) {
@@ -58,6 +82,11 @@ var Planet = {};
 
   Planet.render = function(planet, canvas) {
     var ctx = canvas.context;
+
+    // render stars in the background
+    planet.stars.forEach(function(star) {
+      renderStar(star, canvas);
+    })
 
     // render buildings
     planet.buildings.forEach(function(building) {
@@ -126,6 +155,15 @@ var Planet = {};
       }
     }
     ctx.restore();
+  }
+
+  function renderStar(star, canvas) {
+    var ctx = canvas.context;
+    var hex = Math.round(star.brightness * 255).toString(16);
+    ctx.fillStyle = '#' + hex + hex + hex;
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.size, 0, Math.PI*2);
+    ctx.fill();
   }
 
   function createPastel() {
