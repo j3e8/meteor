@@ -4,6 +4,10 @@ var Meteor = {};
   var MIN_ROTATION_VELOCITY = 0.001;
   var MAX_ROTATION_VELOCITY = 0.0045;
 
+  var AUDIO_METEOR_ENTRY = "www/audio/meteor-entry.ogg";
+  var AUDIO_METEOR_BREAK = "www/audio/meteor-break.ogg";
+  var AUDIO_METEOR_CRASH = "www/audio/meteor-crash.ogg";
+
   Meteor.generate = function(canvasSize, level, spawnAt, targetX, targetY) {
     var minVelocity = Math.sqrt(Math.sqrt(level)) * 0.08;
     var maxVelocity = Math.sqrt(Math.sqrt(level + 1)) * 0.08;
@@ -61,6 +65,9 @@ var Meteor = {};
       rotationVelocity *= -1;
     }
 
+    var audio = new Audio();
+    audio.src = AUDIO_METEOR_ENTRY;
+
     // return meteor object
     return {
       alive: false,
@@ -74,7 +81,8 @@ var Meteor = {};
       vertices: vertices,
       trajectory: floorsix.math.atan(targetY - y, targetX - x),
       spawnAt: spawnAt,
-      spawned: false
+      spawned: false,
+      audio: audio
     }
   }
 
@@ -166,9 +174,26 @@ var Meteor = {};
     ctx.restore();
   }
 
+  Meteor.break = function(meteor) {
+    meteor.alive = false;
+    meteor.audio.src = AUDIO_METEOR_BREAK;
+    meteor.audio.volume = 0.3;
+    meteor.audio.play();
+  }
+
+  Meteor.crash = function(meteor) {
+    meteor.alive = false;
+    meteor.audio.src = AUDIO_METEOR_CRASH;
+    meteor.audio.volume = 0.6;
+    meteor.audio.play();
+  }
+
   Meteor.spawn = function(meteor) {
     meteor.alive = true;
     meteor.spawned = true;
+    meteor.audio.src = AUDIO_METEOR_ENTRY;
+    meteor.audio.volume = 0.2;
+    meteor.audio.play();
   }
 
 })();

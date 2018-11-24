@@ -2,6 +2,7 @@ floorsix.controller("/", function() {
   var highScore = Stats.loadHighScore();
 
   var NUM_STARS = 75;
+  floorsix.setBackgroundAudio('www/audio/score.mp3');
 
   var canvasSize = floorsix.getCanvasSize();
   var stars = new Array(NUM_STARS);

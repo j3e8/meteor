@@ -26,6 +26,8 @@ floorsix.controller("/play", function() {
   }
   initGame();
 
+  floorsix.setBackgroundAudio('www/audio/score.mp3');
+
   function initLevel() {
     time = 0;
     var canvasSize = floorsix.getCanvasSize();
@@ -65,6 +67,9 @@ floorsix.controller("/play", function() {
 
   function startFlash() {
     flashOpacity = 1;
+    if (window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(200);
+    }
   }
 
   function animate(elapsedMs) {
@@ -92,7 +97,7 @@ floorsix.controller("/play", function() {
 
         var result = Planet.hitTest(planet, meteor);
         if (result.hit && result.building) {
-          meteor.alive = false;
+          Meteor.crash(meteor);
           result.building.alive = false;
           startFlash();
           if (allBuildingsAreGone()) {
@@ -104,7 +109,7 @@ floorsix.controller("/play", function() {
           }
         }
         else if (result.hit) {
-          meteor.alive = false;
+          Meteor.break(meteor);
         }
       }
     });
@@ -163,7 +168,7 @@ floorsix.controller("/play", function() {
       for (var m = 0; m < meteors.length; m++) {
         var meteor = meteors[m];
         if (meteor.alive && Meteor.hitTest(meteor, x, y)) {
-          meteor.alive = false;
+          Meteor.break(meteor);
           Stats.breakMeteor(stats, meteor, planet);
           if (allMeteorsAreGone()) {
             nextLevel();

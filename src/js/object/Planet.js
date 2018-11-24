@@ -4,7 +4,7 @@ var Planet = {};
 
   var NUM_BUILDINGS = 11;
   var NUM_STARS = 75;
-  var STRIPE_WIDTH = 8;
+  var STRIPE_WIDTH = 9;
   var MIN_ANGLE = Math.PI * 1.43;
   var MAX_ANGLE = Math.PI * 1.57;
 
@@ -44,14 +44,30 @@ var Planet = {};
     var numStripes = Math.ceil(visiblePlanetHeight / STRIPE_WIDTH);
     var stripes = new Array(numStripes);
     for (var i=0; i < stripes.length; i++) {
-      var xvariance = canvasSize.width * 0.5;
+      var xvariance = canvasSize.width * 0.2;
       stripes[i] = {
-        x: (canvasSize.width / 2) + (Math.random() * xvariance - xvariance / 2),
-        y: (planet.center.y - planet.radius) + i * STRIPE_WIDTH
+        x: (canvasSize.width / 2) + (Math.random() * xvariance - xvariance / 1.5)
       }
     }
-
+    stripes.sort(function(a, b) {
+      return a.x - b.x;
+    });
+    var shortStripes = stripes.slice(0, Math.floor(stripes.length / 2));
+    var longStripes = stripes.slice(Math.floor(stripes.length / 2));
+    var ss = 0, ls = 0;
+    for (var i=0; i < stripes.length; i++) {
+      if (i % 2 === 0) {
+        stripes[i] = longStripes[ls];
+        ls++;
+      }
+      else {
+        stripes[i] = shortStripes[ss];
+        ss++;
+      }
+      stripes[i].y = (planet.center.y - planet.radius) + i * STRIPE_WIDTH;
+    }
     planet.stripes = stripes;
+    console.log(stripes);
 
     return planet;
   }
@@ -121,15 +137,23 @@ var Planet = {};
     // render stripes
     ctx.lineWidth = STRIPE_WIDTH;
     ctx.lineCap = "round";
-    ctx.strokeStyle = "rgba(0, 0, 0, 0.07)";
     ctx.save();
     ctx.clip();
     for (var i=0; i < planet.stripes.length; i++) {
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.07)";
       var stripe = planet.stripes[i];
       ctx.beginPath();
       ctx.moveTo(0, stripe.y);
       ctx.lineTo(stripe.x, stripe.y);
       ctx.stroke();
+
+      if (i % 2 === 1) { // short stripes
+        ctx.strokeStyle = planet.color;
+        ctx.beginPath();
+        ctx.moveTo(canvas.width, stripe.y);
+        ctx.lineTo(stripe.x, stripe.y);
+        ctx.stroke();
+      }
     }
     ctx.restore();
   }

@@ -4,6 +4,11 @@
     window.floorsix = {};
   }
 
+  var bgAudio;
+  var DEFAULT_VOLUME = 0.1;
+  var bgVolume = DEFAULT_VOLUME;
+  var NAV_AUDIO_FADE_RATE = 0.001;
+
   var lastFrame;
   var controllers = {};
   var animator, renderer, click, mousedown, mousemove, mouseup, touchstart, touchmove, touchend;
@@ -144,6 +149,17 @@
       }
     });
     return search;
+  }
+
+  floorsix.setBackgroundAudio = function(src, volume) {
+    bgVolume = volume || DEFAULT_VOLUME;
+    if (!bgAudio) {
+      bgAudio = new Audio();
+      bgAudio.loop = true;
+      bgAudio.autoplay = true;
+      bgAudio.volume = bgVolume;
+    }
+    bgAudio.src = src;
   }
 
   window.addEventListener("load", function() {
@@ -342,6 +358,13 @@
         navigator.shadowOpacity = 0;
         navigator.phase = NAV_IDLE;
       }
+      if (bgAudio) {
+        let v = bgAudio.volume + NAV_AUDIO_FADE_RATE * elapsedMs;
+        if (v > bgVolume) {
+          v = bgVolume;
+        }
+        bgAudio.volume = v;
+      }
     }
     else if (navigator.phase == NAV_FADE_OUT) {
       navigator.shadowOpacity += NAV_FADE_RATE * elapsedMs;
@@ -349,6 +372,13 @@
         navigator.shadowOpacity = 1;
         navigator.phase = NAV_FADE_IN;
         window.location.hash = "#" + navigator.route;
+      }
+      if (bgAudio) {
+        let v = bgAudio.volume - NAV_AUDIO_FADE_RATE * elapsedMs;
+        if (v < 0) {
+          v = 0;
+        }
+        bgAudio.volume = v;
       }
     }
     if (elapsedMs && animator) {
