@@ -12,6 +12,7 @@ body {
   font-size: 14px;
   overflow: hidden;
   -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
 }
 
 div,
@@ -36,4 +37,6 @@ body * {
 canvas {
   -webkit-tap-highlight-color: transparent;
   -webkit-backface-visibility: hidden;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
 }

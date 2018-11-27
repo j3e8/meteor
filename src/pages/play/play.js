@@ -74,6 +74,22 @@ floorsix.controller("/play", function() {
   }
 
   function animate(elapsedMs) {
+    // draw spots on the screen where the user has tapped
+    taps.forEach(function(tap) {
+      Tap.animate(tap, elapsedMs);
+      if (!tap.alive) {
+        taps.splice(taps.indexOf(tap), 1);
+      }
+    });
+
+    // animate the bright flash (if necessary) that occurs after a collision
+    if (flashOpacity) {
+      flashOpacity -= FLASH_FADE_RATE * elapsedMs;
+      if (flashOpacity < 0) {
+        flashOpacity = 0;
+      }
+    }
+
     if (phase == GET_READY) {
       return;
     }
@@ -116,21 +132,6 @@ floorsix.controller("/play", function() {
       }
     });
 
-    // draw spots on the screen where the user has tapped
-    taps.forEach(function(tap) {
-      Tap.animate(tap, elapsedMs);
-      if (!tap.alive) {
-        taps.splice(taps.indexOf(tap), 1);
-      }
-    });
-
-    // animate the bright flash (if necessary) that occurs after a collision
-    if (flashOpacity) {
-      flashOpacity -= FLASH_FADE_RATE * elapsedMs;
-      if (flashOpacity < 0) {
-        flashOpacity = 0;
-      }
-    }
   }
 
   function render(canvas) {

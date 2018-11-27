@@ -28,6 +28,9 @@
     route: ''
   }
 
+  var isPaused = false;
+  var elapsedWhenPaused = 0;
+
   var _isInitialized = false;
   var ratio = 1;
   var output = document.createElement("div");
@@ -101,6 +104,29 @@
       y: Math.sin(polar.t) * polar.r
     }
     return c;
+  }
+
+  floorsix.pause = function() {
+    if (isPaused) {
+      return;
+    }
+    isPaused = true;
+    elapsedWhenPaused = new Date().getTime() - lastFrame;
+  }
+
+  floorsix.unpause = function() {
+    if (!isPaused) {
+      return;
+    }
+    isPaused = false;
+    if (elapsedWhenPaused) {
+      lastFrame = new Date().getTime() - elapsedWhenPaused;
+    }
+    elapsedWhenPaused = 0;
+  }
+
+  floorsix.isPaused = function() {
+    return isPaused;
   }
 
   floorsix.navigate = function(route) {
@@ -201,6 +227,21 @@
     _requestAnimationFrame(animate);
   });
 
+  document.addEventListener("visibilitychange", function() {
+    if (document.visibilityState == 'visible') {
+      if (bgAudio && bgAudio.src) {
+        bgAudio.play();
+      }
+      floorsix.unpause();
+    }
+    else if (document.visibilityState == 'hidden') {
+      if (bgAudio && bgAudio.src) {
+        bgAudio.pause();
+      }
+      floorsix.pause();
+    }
+  });
+
   function checkForRouteChange() {
     if (!_isInitialized) {
       return;
@@ -281,6 +322,9 @@
 
   function initClickEvents() {
     canvas.addEventListener("click", function(e) {
+      if (navigator.phase === NAV_FADE_IN || navigator.phase === NAV_FADE_OUT) {
+        return;
+      }
       var pt = getCoordsRelativeToCanvas(e.clientX, e.clientY, canvas);
       if (click) {
         click(pt.x, pt.y);
@@ -354,6 +398,9 @@
 
   function animate() {
     if (!_isInitialized) {
+      return;
+    }
+    if (isPaused) {
       return;
     }
     var thisFrame = new Date().getTime();
