@@ -305,26 +305,33 @@
       }
     });
     canvas.addEventListener("touchstart", function(e) {
-      var pts = e.touches.map(function(t) {
-        return getCoordsRelativeToCanvas(t.clientX, t.clientY, canvas);
-      });
-      if (touchstart) {
+      var pts = [];
+      for (var i=0; i < e.touches.length; i++) {
+        var t = e.touches[i];
+        pts.push(getCoordsRelativeToCanvas(t.clientX, t.clientY, canvas));
+      }
+      if (touchstart && pts.length) {
         touchstart(pts);
       }
     });
     canvas.addEventListener("touchmove", function(e) {
-      var pts = e.touches.map(function(t) {
-        return getCoordsRelativeToCanvas(t.clientX, t.clientY, canvas);
-      });
-      if (touchmove) {
+      var pts = [];
+      for (var i=0; i < e.touches.length; i++) {
+        var t = e.touches[i];
+        pts.push(getCoordsRelativeToCanvas(t.clientX, t.clientY, canvas));
+      }
+      if (touchmove && pts.length) {
         touchmove(pts);
       }
+      e.preventDefault();
     });
     canvas.addEventListener("touchend", function(e) {
-      var pts = e.touches.map(function(t) {
-        return getCoordsRelativeToCanvas(t.clientX, t.clientY, canvas);
-      });
-      if (touchend) {
+      var pts = [];
+      for (var i=0; i < e.touches.length; i++) {
+        var t = e.touches[i];
+        pts.push(getCoordsRelativeToCanvas(t.clientX, t.clientY, canvas));
+      }
+      if (touchend && pts.length) {
         touchend(pts);
       }
     });

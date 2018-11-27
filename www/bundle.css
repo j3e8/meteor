@@ -1,5 +1,6 @@
 html {
   height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -9,6 +10,8 @@ body {
   font-family: 'Avenir-Light', sans-serif;
   font-weight: 300;
   font-size: 14px;
+  overflow: hidden;
+  -webkit-touch-callout: none !important;
 }
 
 div,
@@ -25,4 +28,12 @@ body * {
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+}
+
+canvas {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-backface-visibility: hidden;
 }

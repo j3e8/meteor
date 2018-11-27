@@ -5,7 +5,7 @@ floorsix.controller("/play", function() {
   var GAME_OVER = 30;
 
   var NEXT_LEVEL_TIMEOUT = 2500;
-  var METEORS_PER_LEVEL = 25;
+  var METEORS_PER_LEVEL = 20;
 
   var level = 0;
   var meteors = [];
@@ -17,16 +17,17 @@ floorsix.controller("/play", function() {
   var time = 0;
   var flashOpacity = 0;
 
+  var taps = [];
+
   var FLASH_FADE_RATE = 0.002;
 
   function initGame() {
     var canvasSize = floorsix.getCanvasSize();
     planet = Planet.generate(canvasSize);
     stats = Stats.generate();
+    floorsix.setBackgroundAudio('www/audio/score2.mp3');
   }
   initGame();
-
-  floorsix.setBackgroundAudio('www/audio/score.mp3');
 
   function initLevel() {
     time = 0;
@@ -87,8 +88,9 @@ floorsix.controller("/play", function() {
 
     time += elapsedMs;
 
+    // render the meteors on screen
     meteors.forEach(function(meteor) {
-      if (time >= meteor.spawnAt && !meteor.spawned) {
+      if (time >= meteor.spawnAt && !meteor.spawned && phase == PLAYING) {
         Meteor.spawn(meteor);
       }
 
@@ -111,6 +113,14 @@ floorsix.controller("/play", function() {
         else if (result.hit) {
           Meteor.break(meteor);
         }
+      }
+    });
+
+    // draw spots on the screen where the user has tapped
+    taps.forEach(function(tap) {
+      Tap.animate(tap, elapsedMs);
+      if (!tap.alive) {
+        taps.splice(taps.indexOf(tap), 1);
       }
     });
 
@@ -156,6 +166,10 @@ floorsix.controller("/play", function() {
       ctx.fillText('WAVE ' + level, canvas.width / 2, canvas.height / 3);
     }
 
+    taps.forEach(function(tap) {
+      Tap.render(tap, canvas);
+    });
+
     // render the bright flash (if necessary) that occurs after a collision
     if (flashOpacity) {
       ctx.fillStyle = "rgba(157, 181, 191, " + flashOpacity + ")";
@@ -164,7 +178,23 @@ floorsix.controller("/play", function() {
   }
 
   function handleClick(x, y) {
+    if (phase == GET_READY) {
+      nextLevel();
+    }
+    else if (phase == GAME_OVER) {
+      floorsix.navigate('/');
+    }
+  }
+
+  function handleTouchStart(pts) {
+    pts.forEach(function(pt) {
+      handleTouch(pt.x, pt.y);
+    });
+  }
+
+  function handleTouch(x, y) {
     if (phase == PLAYING) {
+      taps.push(Tap.generate(x, y));
       for (var m = 0; m < meteors.length; m++) {
         var meteor = meteors[m];
         if (meteor.alive && Meteor.hitTest(meteor, x, y)) {
@@ -177,17 +207,12 @@ floorsix.controller("/play", function() {
         }
       }
     }
-    else if (phase == GET_READY) {
-      nextLevel();
-    }
-    else if (phase == GAME_OVER) {
-      floorsix.navigate('/');
-    }
   }
 
   return {
     'animate': animate,
     'render': render,
-    'click': handleClick
+    'click': handleClick,
+    'touchstart': handleTouchStart,
   }
 });

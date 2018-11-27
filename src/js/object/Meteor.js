@@ -4,16 +4,16 @@ var Meteor = {};
   var MIN_ROTATION_VELOCITY = 0.001;
   var MAX_ROTATION_VELOCITY = 0.0045;
 
-  var AUDIO_METEOR_ENTRY = "www/audio/meteor-entry.ogg";
-  var AUDIO_METEOR_BREAK = "www/audio/meteor-break.ogg";
-  var AUDIO_METEOR_CRASH = "www/audio/meteor-crash.ogg";
+  var AUDIO_METEOR_ENTRY = "www/audio/meteor-entry.mp3";
+  var AUDIO_METEOR_BREAK = "www/audio/meteor-break.mp3";
+  var AUDIO_METEOR_CRASH = "www/audio/meteor-crash.mp3";
 
   Meteor.generate = function(canvasSize, level, spawnAt, targetX, targetY) {
     var minVelocity = Math.sqrt(Math.sqrt(level)) * 0.08;
     var maxVelocity = Math.sqrt(Math.sqrt(level + 1)) * 0.08;
 
     // calculate meteor radius based on level and canvasSize
-    var baseSize = canvasSize.width * 0.05;
+    var baseSize = canvasSize.width * 0.08;
     var levelMultipler = 1 / Math.sqrt(Math.sqrt(level));
     var randomMultiplier = Math.random() * 0.4 + 0.8; // between 0.8 and 1.2
     var radius = baseSize * levelMultipler * randomMultiplier;

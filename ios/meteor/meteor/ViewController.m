@@ -18,9 +18,13 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
 
-    NSURL *url = [[NSBundle mainBundle] URLForResource:@"index" withExtension:@"html"];
-    NSLog(@"%@", [url absoluteString]);
-    [_webview loadRequest:[NSURLRequest requestWithURL:url]];
+    NSSet *websiteDataTypes = [NSSet setWithArray:@[WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache]];
+    NSDate *dateFrom = [NSDate dateWithTimeIntervalSince1970:0];
+    [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:websiteDataTypes modifiedSince:dateFrom completionHandler:^{
+        NSURL *url = [[NSBundle mainBundle] URLForResource:@"index" withExtension:@"html"];
+        NSLog(@"%@", [url absoluteString]);
+        [self.webview loadRequest:[NSURLRequest requestWithURL:url]];
+    }];
 }
 
 

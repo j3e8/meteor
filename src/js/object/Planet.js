@@ -67,7 +67,6 @@ var Planet = {};
       stripes[i].y = (planet.center.y - planet.radius) + i * STRIPE_WIDTH;
     }
     planet.stripes = stripes;
-    console.log(stripes);
 
     return planet;
   }
